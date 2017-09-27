@@ -1,1 +1,1 @@
-# template_ibm_db2_v11_wasnd_v9_singleserver
+Copyright IBM Corp. 2017, 2017
