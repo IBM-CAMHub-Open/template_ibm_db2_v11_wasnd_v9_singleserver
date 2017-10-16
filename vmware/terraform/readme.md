@@ -35,7 +35,7 @@ IBM WebSphere Application Server Network Deployment V9<br>
 <br>
 ### Default Virtual Machine Settings
 
- vCPU 2, Memory (GB) 4<br>
+ vCPU 2, Memory (GB) 8<br>
 <br>
 ### Usage and Special Notes
 

@@ -942,7 +942,8 @@
       "options": [
         {
           "value": "eager_zeroed",
-          "label": "Thick Provision Eager Zeroed"
+          "label": "Thick Provision Eager Zeroed",
+          "default": "true"
         },
         {
           "value": "lazy",
@@ -951,7 +952,6 @@
         {
           "value": "thin",
           "label": "Thin Provision",
-          "default": "true",
           "group_name": "virtualmachine"
         }
       ],
@@ -985,7 +985,7 @@
       "name": "DB2WASNode01_memory",
       "type": "string",
       "description": "Memory assigned to the virtual machine in megabytes. This value is required to be an increment of 1024",
-      "default": 4096,
+      "default": 8192,
       "hidden": false,
       "label": "Virtual Machine Memory - DB2WASNode01",
       "secured": false,

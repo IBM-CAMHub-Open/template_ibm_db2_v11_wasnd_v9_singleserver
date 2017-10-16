@@ -43,7 +43,7 @@
     "description": "IBM DB2 Enterprise Server Edition V11.1<br>IBM WebSphere Application Server Network Deployment V9<br>"},
 {
     "title": "Default Virtual Machine Settings",
-    "description": " vCPU 2, Memory (GB) 4<br>"},
+    "description": " vCPU 2, Memory (GB) 8<br>"},
 {
     "title": "Usage and Special Notes",
     "description": "1. The user is responsible for obtaining appropriate software licenses and downloads prior to template deployment.<br>2. Detailed system requirements - <a href=\"https://www.ibm.com/software/reports/compatibility/clarity/index.html\" target=\"_blank\">https://www.ibm.com/software/reports/compatibility/clarity/index.html</a><br>3. IBM Knowledge Center for DB2 V11.1 - <a href=\"https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0\" target=\"_blank\">https://www.ibm.com/support/knowledgecenter/en/SSEPGG_11.1.0</a><br>4. IBM Knowledge Center for WAS ND V9 - <a href=\"https://www.ibm.com/support/knowledgecenter/en/SSAW57_9.0.0\" target=\"_blank\">https://www.ibm.com/support/knowledgecenter/en/SSAW57_9.0.0</a><br>5. IBM Support Portal - <a href=\"https://www.ibm.com/support/home/\" target=\"_blank\">https://www.ibm.com/support/home/</a><br>"}
