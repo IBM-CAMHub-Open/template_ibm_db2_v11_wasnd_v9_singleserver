@@ -9,33 +9,38 @@
 # This is a terraform generated template generated from ibm_db2_v11_wasnd_v9_singleserver
 
 ##############################################################
-# Keys - CAMC (public/private) & optional User Key (public) 
+# Keys - CAMC (public/private) & optional User Key (public)
 ##############################################################
-variable "user_public_ssh_key" {
-  type = "string"
-  description = "User defined public SSH key used to connect to the virtual machine. The format must be in openSSH."
-  default = "None"
-}
-
-variable "ibm_pm_public_ssh_key" {
-  description = "Public CAMC SSH key value which is used to connect to a guest, used on VMware only."
+variable "ibm_pm_public_ssh_key_name" {
+  description = "Public CAMC SSH key name used to connect to the virtual guest."
 }
 
 variable "ibm_pm_private_ssh_key" {
   description = "Private CAMC SSH key (base64 encoded) used to connect to the virtual guest."
 }
 
-variable "allow_unverified_ssl" {
-  description = "Communication with vsphere server with self signed certificate"
-  default = "true"
+variable "user_public_ssh_key" {
+  type        = "string"
+  description = "User defined public SSH key used to connect to the virtual machine. The format must be in openSSH."
+  default     = "None"
+}
+
+variable "aws_ami_owner_id" {
+  description = "The AMI Owner ID"
+  default     = "309956199498"
+}
+
+variable "aws_region" {
+  description = "The aws region"
+  default     = "us-east-1"
 }
 
 ##############################################################
-# Define the vsphere provider 
+# Define the aws provider
 ##############################################################
-provider "vsphere" {
-  allow_unverified_ssl = "${var.allow_unverified_ssl}"
-  version = "~> 0.4"
+provider "aws" {
+  region  = "${var.aws_region}"
+  version = "~> 1.2"
 }
 
 provider "camc" {
@@ -46,12 +51,34 @@ provider "random" {
   version = "~> 1.0"
 }
 
+data "aws_vpc" "selected_vpc" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.aws_vpc_name}"]
+  }
+}
+
+#Parameter : aws_vpc_name
+variable "aws_vpc_name" {
+  description = "The name of the aws vpc"
+}
+
+data "aws_security_group" "aws_sg_camc_name_selected" {
+  name   = "${var.aws_sg_camc_name}"
+  vpc_id = "${data.aws_vpc.selected_vpc.id}"
+}
+
+#Parameter : aws_sg_camc_name
+variable "aws_sg_camc_name" {
+  description = "The name of the aws security group for automation content"
+}
+
 resource "random_id" "stack_id" {
   byte_length = "16"
 }
 
 ##############################################################
-# Define pattern variables 
+# Define pattern variables
 ##############################################################
 ##### unique stack name #####
 variable "ibm_stack_name" {
@@ -59,549 +86,529 @@ variable "ibm_stack_name" {
 }
 
 #### Default OS Admin User Map ####
+variable "default_os_admin_user" {
+  type        = "map"
+  description = "look up os_admin_user using resource image"
+
+  default = {
+    ubuntu_images_ubuntu_xenial-16.04_099720109477 = "ubuntu"
+    RHEL-7.4_HVM_GA_309956199498                   = "ec2-user"
+  }
+}
 
 ##### DB2WASNode01 variables #####
+#Variable : DB2WASNode01-flavor
+variable "DB2WASNode01-flavor" {
+  type        = "string"
+  description = "DB2WASNode01 Flavor"
+  default     = "t2.large"
+}
+
+data "aws_ami" "DB2WASNode01_ami" {
+  most_recent = true
+
+  filter {
+    name   = "name"
+    values = ["${var.DB2WASNode01-image}*"]
+  }
+
+  owners = ["${var.aws_ami_owner_id}"]
+}
+
 #Variable : DB2WASNode01-image
 variable "DB2WASNode01-image" {
-  type = "string"
+  type        = "string"
   description = "Operating system image id / template that should be used when creating the virtual image"
+  default     = "RHEL-7.4_HVM_GA"
+}
+
+#Variable : DB2WASNode01-mgmt-network-public
+variable "DB2WASNode01-mgmt-network-public" {
+  type        = "string"
+  description = "Expose and use public IP of virtual machine for internal communication"
+  default     = "true"
 }
 
 #Variable : DB2WASNode01-name
 variable "DB2WASNode01-name" {
-  type = "string"
+  type        = "string"
   description = "Short hostname of virtual machine"
 }
 
 #Variable : DB2WASNode01-os_admin_user
 variable "DB2WASNode01-os_admin_user" {
-  type = "string"
+  type        = "string"
   description = "Name of the admin user account in the virtual machine that will be accessed via SSH"
 }
 
 #Variable : DB2WASNode01_db2_base_version
 variable "DB2WASNode01_db2_base_version" {
-  type = "string"
+  type        = "string"
   description = "The base version of DB2 to install. Set to none if installing from fix package."
-  default = "none"
+  default     = "none"
 }
 
 #Variable : DB2WASNode01_db2_das_password
 variable "DB2WASNode01_db2_das_password" {
-  type = "string"
+  type        = "string"
   description = "DB2 Administration Server (DAS) password"
 }
 
 #Variable : DB2WASNode01_db2_das_username
 variable "DB2WASNode01_db2_das_username" {
-  type = "string"
+  type        = "string"
   description = "DB2 Administration Server (DAS) username"
-  default = "db2das1"
+  default     = "db2das1"
 }
 
 #Variable : DB2WASNode01_db2_fp_version
 variable "DB2WASNode01_db2_fp_version" {
-  type = "string"
+  type        = "string"
   description = "The version of DB2 fix pack to install. If no fix pack is required, set this value the same as DB2 base version."
-  default = "11.1.2.2"
+  default     = "11.1.2.2"
 }
 
 #Variable : DB2WASNode01_db2_install_dir
 variable "DB2WASNode01_db2_install_dir" {
-  type = "string"
+  type        = "string"
   description = "The directory to install DB2. Recommended: /opt/ibm/db2/V<db2_version>"
-  default = "/opt/ibm/db2/V11.1"
+  default     = "/opt/ibm/db2/V11.1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_codeset
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_codeset" {
-  type = "string"
+  type        = "string"
   description = "Codeset is used by the database manager to determine codepage parameter values."
-  default = "UTF-8"
+  default     = "UTF-8"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_update_FAILARCHPATH
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_update_FAILARCHPATH" {
-  type = "string"
+  type        = "string"
   description = "The path to be used for archiving log files."
-  default = "default"
+  default     = "default"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_update_LOGARCHMETH1
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_update_LOGARCHMETH1" {
-  type = "string"
+  type        = "string"
   description = "Specifies the media type of the primary destination for logs that are archived."
-  default = "default"
+  default     = "default"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_update_LOGFILSIZ
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_update_LOGFILSIZ" {
-  type = "string"
+  type        = "string"
   description = "Specifies the size of log files."
-  default = "default"
+  default     = "default"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_update_LOGSECOND
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_update_LOGSECOND" {
-  type = "string"
+  type        = "string"
   description = "Specifies the number of secondary log files that are created and used for recovery log files."
-  default = "default"
+  default     = "default"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_update_NEWLOGPATH
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_update_NEWLOGPATH" {
-  type = "string"
+  type        = "string"
   description = "The path to be used for database logging."
-  default = "default"
+  default     = "default"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_ldap_user
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_ldap_user" {
-  type = "string"
+  type        = "string"
   description = "This parameter indicates whether the database user is stored in LDAP. If the value set to true, the user is not created on the operating system."
-  default = "false"
+  default     = "false"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_access
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_access" {
-  type = "string"
+  type        = "string"
   description = "The database access granted to the user. Example: DBADM WITH DATAACCESS WITHOUT ACCESSCTRL"
-  default = "none"
+  default     = "none"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_gid
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_gid" {
-  type = "string"
+  type        = "string"
   description = "Specifies the name of the operating system group for database users."
-  default = "dbgroup1"
+  default     = "dbgroup1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_home
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_home" {
-  type = "string"
+  type        = "string"
   description = "The DB2 database user home directory."
-  default = "default"
+  default     = "default"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_name
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_name" {
-  type = "string"
+  type        = "string"
   description = "The user name to be granted database access."
-  default = "dbuser1"
+  default     = "dbuser1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_password
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_password" {
-  type = "string"
+  type        = "string"
   description = "The password for the database user name."
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_db_collate
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_db_collate" {
-  type = "string"
+  type        = "string"
   description = "Collate determines ordering for a set of characters."
-  default = "SYSTEM"
+  default     = "SYSTEM"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_db_data_path
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_db_data_path" {
-  type = "string"
+  type        = "string"
   description = "Specifies the DB2 database data path."
-  default = "/home/db2inst1"
+  default     = "/home/db2inst1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_db_name
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_db_name" {
-  type = "string"
+  type        = "string"
   description = "The name of the database to be created."
-  default = "db01"
+  default     = "db01"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_db_path
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_db_path" {
-  type = "string"
+  type        = "string"
   description = "Specifies the DB2 database path."
-  default = "/home/db2inst1"
+  default     = "/home/db2inst1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_pagesize
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_pagesize" {
-  type = "string"
+  type        = "string"
   description = "Specifies the page size in bytes."
-  default = "4096"
+  default     = "4096"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_databases_database1_territory
 variable "DB2WASNode01_db2_instances_instance1_databases_database1_territory" {
-  type = "string"
+  type        = "string"
   description = "Territory is used by the database manager when processing data that is territory sensitive."
-  default = "US"
+  default     = "US"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_fcm_port
 variable "DB2WASNode01_db2_instances_instance1_fcm_port" {
-  type = "string"
+  type        = "string"
   description = "The port for the DB2 Fast Communications Manager (FCM)."
-  default = "60000"
+  default     = "60000"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_fenced_groupname
 variable "DB2WASNode01_db2_instances_instance1_fenced_groupname" {
-  type = "string"
+  type        = "string"
   description = "The group name for the DB2 fenced user."
-  default = "db2fenc1"
+  default     = "db2fenc1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_fenced_password
 variable "DB2WASNode01_db2_instances_instance1_fenced_password" {
-  type = "string"
+  type        = "string"
   description = "The password for the DB2 fenced username."
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_fenced_username
 variable "DB2WASNode01_db2_instances_instance1_fenced_username" {
-  type = "string"
+  type        = "string"
   description = "The fenced user is used to run user defined functions and stored procedures outside of the address space used by the DB2 database."
-  default = "db2fenc1"
+  default     = "db2fenc1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_instance_dir
 variable "DB2WASNode01_db2_instances_instance1_instance_dir" {
-  type = "string"
+  type        = "string"
   description = "The DB2 instance directory stores all information that pertains to a database instance."
-  default = "/home/db2inst1"
+  default     = "/home/db2inst1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_instance_groupname
 variable "DB2WASNode01_db2_instances_instance1_instance_groupname" {
-  type = "string"
+  type        = "string"
   description = "The group name for the DB2 instance user."
-  default = "db2iadm1"
+  default     = "db2iadm1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_instance_password
 variable "DB2WASNode01_db2_instances_instance1_instance_password" {
-  type = "string"
+  type        = "string"
   description = "The password for the DB2 instance username."
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_instance_prefix
 variable "DB2WASNode01_db2_instances_instance1_instance_prefix" {
-  type = "string"
+  type        = "string"
   description = "Specifies the DB2 instance prefix"
-  default = "INST1"
+  default     = "INST1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_instance_type
 variable "DB2WASNode01_db2_instances_instance1_instance_type" {
-  type = "string"
+  type        = "string"
   description = "The type of DB2 instance to create."
-  default = "ESE"
+  default     = "ESE"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_instance_username
 variable "DB2WASNode01_db2_instances_instance1_instance_username" {
-  type = "string"
+  type        = "string"
   description = "The DB2 instance username controls all DB2 processes and owns all filesystems and devices."
-  default = "db2inst1"
+  default     = "db2inst1"
 }
 
 #Variable : DB2WASNode01_db2_instances_instance1_port
 variable "DB2WASNode01_db2_instances_instance1_port" {
-  type = "string"
+  type        = "string"
   description = "The port to connect to the DB2 instance."
-  default = "50000"
+  default     = "50000"
 }
 
 #Variable : DB2WASNode01_was_install_dir
 variable "DB2WASNode01_was_install_dir" {
-  type = "string"
+  type        = "string"
   description = "The installation root directory for the WebSphere Application Server product binaries"
-  default = "/opt/IBM/WebSphere/AppServer"
+  default     = "/opt/IBM/WebSphere/AppServer"
 }
 
 #Variable : DB2WASNode01_was_java_version
 variable "DB2WASNode01_was_java_version" {
-  type = "string"
+  type        = "string"
   description = "The Java SDK version that should be installed with the WebSphere Application Server. Example format is 8.0.4.70"
-  default = "8.0.4.70"
+  default     = "8.0.4.70"
 }
 
 #Variable : DB2WASNode01_was_os_users_was_gid
 variable "DB2WASNode01_was_os_users_was_gid" {
-  type = "string"
+  type        = "string"
   description = "Operating system group name that will be assigned to the product installation"
-  default = "wasgrp"
+  default     = "wasgrp"
 }
 
 #Variable : DB2WASNode01_was_os_users_was_home
 variable "DB2WASNode01_was_os_users_was_home" {
-  type = "string"
+  type        = "string"
   description = "Home directory location for operating system user that is used for product installation"
-  default = "/home/wasadmin"
+  default     = "/home/wasadmin"
 }
 
 #Variable : DB2WASNode01_was_os_users_was_ldap_user
 variable "DB2WASNode01_was_os_users_was_ldap_user" {
-  type = "string"
+  type        = "string"
   description = "A flag which indicates whether to create the WebSphere user locally, or utilize an LDAP based user"
-  default = "false"
+  default     = "false"
 }
 
 #Variable : DB2WASNode01_was_os_users_was_name
 variable "DB2WASNode01_was_os_users_was_name" {
-  type = "string"
+  type        = "string"
   description = "Operating system userid that will be used to install the product. Userid will be created if it does not exist"
-  default = "wasadmin"
+  default     = "wasadmin"
 }
 
 #Variable : DB2WASNode01_was_profile_dir
 variable "DB2WASNode01_was_profile_dir" {
-  type = "string"
+  type        = "string"
   description = "The directory path that contains WebSphere Application Server profiles"
-  default = "/opt/IBM/WebSphere/AppServer/profiles"
+  default     = "/opt/IBM/WebSphere/AppServer/profiles"
 }
 
 #Variable : DB2WASNode01_was_profiles_standalone_profiles_standalone1_cell
 variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_cell" {
-  type = "string"
+  type        = "string"
   description = "Cell name for the application server"
-  default = "cell01"
+  default     = "cell01"
 }
 
 #Variable : DB2WASNode01_was_profiles_standalone_profiles_standalone1_keystorepassword
 variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_keystorepassword" {
-  type = "string"
+  type        = "string"
   description = "Specifies the password to use on all keystore files created during profile creation"
 }
 
 #Variable : DB2WASNode01_was_profiles_standalone_profiles_standalone1_profile
 variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_profile" {
-  type = "string"
+  type        = "string"
   description = "Application server profile name"
-  default = "AppSrv01"
+  default     = "AppSrv01"
 }
 
 #Variable : DB2WASNode01_was_profiles_standalone_profiles_standalone1_server
 variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_server" {
-  type = "string"
+  type        = "string"
   description = "Name of the application server"
-  default = "standalone01"
+  default     = "standalone01"
 }
 
 #Variable : DB2WASNode01_was_security_admin_user
 variable "DB2WASNode01_was_security_admin_user" {
-  type = "string"
+  type        = "string"
   description = "The username for securing the WebSphere adminstrative console"
-  default = "wasadmin"
+  default     = "wasadmin"
 }
 
 #Variable : DB2WASNode01_was_security_admin_user_pwd
 variable "DB2WASNode01_was_security_admin_user_pwd" {
-  type = "string"
+  type        = "string"
   description = "The password for the WebSphere administrative account"
 }
 
 #Variable : DB2WASNode01_was_version
 variable "DB2WASNode01_was_version" {
-  type = "string"
+  type        = "string"
   description = "The release and fixpack level of WebSphere Application Server to be installed. Example formats are 8.5.5.12 or 9.0.0.4"
-  default = "9.0.0.4"
+  default     = "9.0.0.4"
 }
 
 #Variable : DB2WASNode01_was_wsadmin_standalone_jvmproperty_property_value_initial
 variable "DB2WASNode01_was_wsadmin_standalone_jvmproperty_property_value_initial" {
-  type = "string"
+  type        = "string"
   description = "Minimum JVM heap size"
-  default = "256"
+  default     = "256"
 }
 
 #Variable : DB2WASNode01_was_wsadmin_standalone_jvmproperty_property_value_maximum
 variable "DB2WASNode01_was_wsadmin_standalone_jvmproperty_property_value_maximum" {
-  type = "string"
+  type        = "string"
   description = "Maximum JVM heap size"
-  default = "512"
+  default     = "512"
 }
-
 
 ##### Environment variables #####
 #Variable : ibm_im_repo
 variable "ibm_im_repo" {
-  type = "string"
+  type        = "string"
   description = "IBM Software  Installation Manager Repository URL (https://<hostname/IP>:<port>/IMRepo) "
 }
 
 #Variable : ibm_im_repo_password
 variable "ibm_im_repo_password" {
-  type = "string"
+  type        = "string"
   description = "IBM Software  Installation Manager Repository Password"
 }
 
 #Variable : ibm_im_repo_user
 variable "ibm_im_repo_user" {
-  type = "string"
+  type        = "string"
   description = "IBM Software  Installation Manager Repository username"
-  default = "repouser"
+  default     = "repouser"
 }
 
 #Variable : ibm_pm_access_token
 variable "ibm_pm_access_token" {
-  type = "string"
+  type        = "string"
   description = "IBM Pattern Manager Access Token"
 }
 
 #Variable : ibm_pm_service
 variable "ibm_pm_service" {
-  type = "string"
+  type        = "string"
   description = "IBM Pattern Manager Service"
 }
 
 #Variable : ibm_sw_repo
 variable "ibm_sw_repo" {
-  type = "string"
+  type        = "string"
   description = "IBM Software Repo Root (https://<hostname>:<port>)"
 }
 
 #Variable : ibm_sw_repo_password
 variable "ibm_sw_repo_password" {
-  type = "string"
+  type        = "string"
   description = "IBM Software Repo Password"
 }
 
 #Variable : ibm_sw_repo_user
 variable "ibm_sw_repo_user" {
-  type = "string"
+  type        = "string"
   description = "IBM Software Repo Username"
-  default = "repouser"
+  default     = "repouser"
 }
 
+##### domain name #####
+variable "runtime_domain" {
+  description = "domain name"
+  default     = "cam.ibm.com"
+}
 
 #########################################################
 ##### Resource : DB2WASNode01
 #########################################################
 
-variable "DB2WASNode01-os_password" {
-  type = "string"
-  description = "Operating System Password for the Operating System User to access virtual machine"
+#Parameter : DB2WASNode01_subnet_name
+data "aws_subnet" "DB2WASNode01_selected_subnet" {
+  filter {
+    name   = "tag:Name"
+    values = ["${var.DB2WASNode01_subnet_name}"]
+  }
 }
 
-variable "DB2WASNode01_folder" {
-  description = "Target vSphere folder for virtual machine"
+variable "DB2WASNode01_subnet_name" {
+  type        = "string"
+  description = "AWS Subnet Name"
 }
 
-variable "DB2WASNode01_datacenter" {
-  description = "Target vSphere datacenter for virtual machine creation"
+#Parameter : DB2WASNode01_associate_public_ip_address
+variable "DB2WASNode01_associate_public_ip_address" {
+  type        = "string"
+  description = "Assign a public IP"
+  default     = "true"
 }
 
-variable "DB2WASNode01_domain" {
-  description = "Domain Name of virtual machine"
+#Parameter : DB2WASNode01_root_block_device_volume_type
+variable "DB2WASNode01_root_block_device_volume_type" {
+  type        = "string"
+  description = "AWS Root Block Device Volume Type"
+  default     = "gp2"
 }
 
-variable "DB2WASNode01_number_of_vcpu" {
-  description = "Number of virtual CPU for the virtual machine, which is required to be a positive Integer"
-  default = "2"
+#Parameter : DB2WASNode01_root_block_device_volume_size
+variable "DB2WASNode01_root_block_device_volume_size" {
+  type        = "string"
+  description = "AWS Root Block Device Volume Size"
+  default     = "25"
 }
 
-variable "DB2WASNode01_memory" {
-  description = "Memory assigned to the virtual machine in megabytes. This value is required to be an increment of 1024"
-  default = "2048"
+#Parameter : DB2WASNode01_root_block_device_delete_on_termination
+variable "DB2WASNode01_root_block_device_delete_on_termination" {
+  type        = "string"
+  description = "AWS Root Block Device Delete on Termination"
+  default     = "true"
 }
 
-variable "DB2WASNode01_cluster" {
-  description = "Target vSphere cluster to host the virtual machine"
-}
+resource "aws_instance" "DB2WASNode01" {
+  ami                         = "${data.aws_ami.DB2WASNode01_ami.id}"
+  instance_type               = "${var.DB2WASNode01-flavor}"
+  key_name                    = "${var.ibm_pm_public_ssh_key_name}"
+  vpc_security_group_ids      = ["${data.aws_security_group.aws_sg_camc_name_selected.id}"]
+  subnet_id                   = "${data.aws_subnet.DB2WASNode01_selected_subnet.id}"
+  associate_public_ip_address = "${var.DB2WASNode01_associate_public_ip_address}"
 
-variable "DB2WASNode01_dns_suffixes" {
-  type = "list"
-  description = "Name resolution suffixes for the virtual network adapter"
-}
-
-variable "DB2WASNode01_dns_servers" {
-  type = "list"
-  description = "DNS servers for the virtual network adapter"
-}
-
-variable "DB2WASNode01_network_interface_label" {
-  description = "vSphere port group or network label for virtual machine's vNIC"
-}
-
-variable "DB2WASNode01_ipv4_gateway" {
-  description = "IPv4 gateway for vNIC configuration"
-}
-
-variable "DB2WASNode01_ipv4_address" {
-  description = "IPv4 address for vNIC configuration"
-}
-
-variable "DB2WASNode01_ipv4_prefix_length" {
-  description = "IPv4 prefix length for vNIC configuration. The value must be a number between 8 and 32"
-}
-
-variable "DB2WASNode01_adapter_type" {
-  description = "Network adapter type for vNIC Configuration"
-  default = "vmxnet3"
-}
-
-variable "DB2WASNode01_root_disk_datastore" {
-  description = "Data store or storage cluster name for target virtual machine's disks"
-}
-
-variable "DB2WASNode01_root_disk_type" {
-  type = "string"
-  description = "Type of template disk volume"
-  default = "eager_zeroed"
-}
-
-variable "DB2WASNode01_root_disk_controller_type" {
-  type = "string"
-  description = "Type of template disk controller"
-  default = "scsi"
-}
-
-variable "DB2WASNode01_root_disk_keep_on_remove" {
-  type = "string"
-  description = "Delete template disk volume when the virtual machine is deleted"
-  default = "false"
-}
-
-# vsphere vm
-resource "vsphere_virtual_machine" "DB2WASNode01" {
-  name = "${var.DB2WASNode01-name}"
-  domain = "${var.DB2WASNode01_domain}"
-  folder = "${var.DB2WASNode01_folder}"
-  datacenter = "${var.DB2WASNode01_datacenter}"
-  vcpu = "${var.DB2WASNode01_number_of_vcpu}"
-  memory = "${var.DB2WASNode01_memory}"
-  cluster = "${var.DB2WASNode01_cluster}"
-  dns_suffixes = "${var.DB2WASNode01_dns_suffixes}"
-  dns_servers = "${var.DB2WASNode01_dns_servers}"
-
-  network_interface {
-    label = "${var.DB2WASNode01_network_interface_label}"
-    ipv4_gateway = "${var.DB2WASNode01_ipv4_gateway}"
-    ipv4_address = "${var.DB2WASNode01_ipv4_address}"
-    ipv4_prefix_length = "${var.DB2WASNode01_ipv4_prefix_length}"
-    adapter_type = "${var.DB2WASNode01_adapter_type}"
+  tags {
+    Name = "${var.DB2WASNode01-name}"
   }
 
-  disk {
-    type = "${var.DB2WASNode01_root_disk_type}"
-    template = "${var.DB2WASNode01-image}"
-    datastore = "${var.DB2WASNode01_root_disk_datastore}"
-    keep_on_remove = "${var.DB2WASNode01_root_disk_keep_on_remove}"
-    controller_type = "${var.DB2WASNode01_root_disk_controller_type}"
-  }
-
-  # Specify the connection
+  # Specify the ssh connection
   connection {
-    type = "ssh"
-    user = "${var.DB2WASNode01-os_admin_user}"
-    password = "${var.DB2WASNode01-os_password}"
+    user        = "${var.DB2WASNode01-os_admin_user == "" ? lookup(var.default_os_admin_user, format("%s_%s", replace(var.DB2WASNode01-image, "/", "_"), var.aws_ami_owner_id)) : var.DB2WASNode01-os_admin_user}"
+    private_key = "${base64decode(var.ibm_pm_private_ssh_key)}"
   }
 
   provisioner "file" {
     destination = "DB2WASNode01_add_ssh_key.sh"
-    content     = <<EOF
+
+    content = <<EOF
 # =================================================================
 # Licensed Materials - Property of IBM
 # 5737-E67
@@ -611,47 +618,34 @@ resource "vsphere_virtual_machine" "DB2WASNode01" {
 # =================================================================
 #!/bin/bash
 
-if (( $# != 3 )); then
-echo "usage: arg 1 is user, arg 2 is public key, arg3 is CAMC Public Key"
-exit -1
+if (( $# != 2 )); then
+    echo "usage: arg 1 is user, arg 2 is public key"
+    exit -1
 fi
 
-userid="$1"
-ssh_key="$2"
-camc_ssh_key="$3"
+userid=$1
+ssh_key=$2
+
+if [[ $ssh_key = 'None' ]]; then
+  echo "skipping add, 'None' specified"
+  exit 0
+fi
 
 user_home=$(eval echo "~$userid")
 user_auth_key_file=$user_home/.ssh/authorized_keys
-echo "$user_auth_key_file"
 if ! [ -f $user_auth_key_file ]; then
-echo "$user_auth_key_file does not exist on this system, creating."
-mkdir $user_home/.ssh
-chmod 700 $user_home/.ssh
-touch $user_home/.ssh/authorized_keys
-chmod 600 $user_home/.ssh/authorized_keys
+  echo "$user_auth_key_file does not exist on this system"
+  exit -1
 else
-echo "user_home : $user_home"
+  echo "user_home --> $user_home"
 fi
 
-if [[ $ssh_key = 'None' ]]; then
-echo "skipping user key add, 'None' specified"
-else
-echo "$user_auth_key_file"
-echo "$ssh_key" >> "$user_auth_key_file"
+echo $ssh_key >> $user_auth_key_file
 if [ $? -ne 0 ]; then
-echo "failed to add to $user_auth_key_file"
-exit -1
+  echo "failed to add to $user_auth_key_file"
+  exit -1
 else
-echo "updated $user_auth_key_file"
-fi
-fi
-
-echo "$camc_ssh_key" >> "$user_auth_key_file"
-if [ $? -ne 0 ]; then
-echo "failed to add to $user_auth_key_file"
-exit -1
-else
-echo "updated $user_auth_key_file"
+  echo "updated $user_auth_key_file"
 fi
 
 EOF
@@ -661,10 +655,31 @@ EOF
   provisioner "remote-exec" {
     inline = [
       "bash -c 'chmod +x DB2WASNode01_add_ssh_key.sh'",
-      "bash -c './DB2WASNode01_add_ssh_key.sh  \"${var.DB2WASNode01-os_admin_user}\" \"${var.user_public_ssh_key}\" \"${var.ibm_pm_public_ssh_key}\">> DB2WASNode01_add_ssh_key.log 2>&1'"
+      "bash -c './DB2WASNode01_add_ssh_key.sh  \"${var.DB2WASNode01-os_admin_user}\" \"${var.user_public_ssh_key}\">> DB2WASNode01_add_ssh_key.log 2>&1'",
     ]
   }
 
+  root_block_device {
+    volume_type = "${var.DB2WASNode01_root_block_device_volume_type}"
+    volume_size = "${var.DB2WASNode01_root_block_device_volume_size}"
+
+    #iops = "${var.DB2WASNode01_root_block_device_iops}"
+    delete_on_termination = "${var.DB2WASNode01_root_block_device_delete_on_termination}"
+  }
+
+  user_data = "${data.template_cloudinit_config.DB2WASNode01_init.rendered}"
+}
+
+data "template_cloudinit_config" "DB2WASNode01_init" {
+  part {
+    content_type = "text/cloud-config"
+
+    content = <<EOF
+hostname: ${var.DB2WASNode01-name}
+fqdn: ${var.DB2WASNode01-name}.${var.runtime_domain}
+manage_etc_hosts: false
+EOF
+  }
 }
 
 #########################################################
@@ -672,18 +687,19 @@ EOF
 #########################################################
 
 resource "camc_bootstrap" "DB2WASNode01_chef_bootstrap_comp" {
-  depends_on = ["camc_vaultitem.VaultItem","vsphere_virtual_machine.DB2WASNode01"]
-  name = "DB2WASNode01_chef_bootstrap_comp"
-  camc_endpoint = "${var.ibm_pm_service}/v1/bootstrap/chef"
-  access_token = "${var.ibm_pm_access_token}"
+  depends_on      = ["camc_vaultitem.VaultItem", "aws_instance.DB2WASNode01"]
+  name            = "DB2WASNode01_chef_bootstrap_comp"
+  camc_endpoint   = "${var.ibm_pm_service}/v1/bootstrap/chef"
+  access_token    = "${var.ibm_pm_access_token}"
   skip_ssl_verify = true
-  trace = true
+  trace           = true
+
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, format("%s_%s", replace(var.DB2WASNode01-image, "/", "_"), var.aws_ami_owner_id)) : var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
-  "host_ip": "${vsphere_virtual_machine.DB2WASNode01.network_interface.0.ipv4_address}",
+  "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? aws_instance.DB2WASNode01.private_ip : aws_instance.DB2WASNode01.public_ip}",
   "node_name": "${var.DB2WASNode01-name}",
   "node_attributes": {
     "ibm_internal": {
@@ -699,24 +715,24 @@ resource "camc_bootstrap" "DB2WASNode01_chef_bootstrap_comp" {
 EOT
 }
 
-
 #########################################################
 ##### Resource : DB2WASNode01_db2_create_db
 #########################################################
 
 resource "camc_softwaredeploy" "DB2WASNode01_db2_create_db" {
-  depends_on = ["camc_softwaredeploy.DB2WASNode01_db2_v111_install"]
-  name = "DB2WASNode01_db2_create_db"
-  camc_endpoint = "${var.ibm_pm_service}/v1/software_deployment/chef"
-  access_token = "${var.ibm_pm_access_token}"
+  depends_on      = ["camc_softwaredeploy.DB2WASNode01_db2_v111_install"]
+  name            = "DB2WASNode01_db2_create_db"
+  camc_endpoint   = "${var.ibm_pm_service}/v1/software_deployment/chef"
+  access_token    = "${var.ibm_pm_access_token}"
   skip_ssl_verify = true
-  trace = true
+  trace           = true
+
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, format("%s_%s", replace(var.DB2WASNode01-image, "/", "_"), var.aws_ami_owner_id)) : var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
-  "host_ip": "${vsphere_virtual_machine.DB2WASNode01.network_interface.0.ipv4_address}",
+  "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? aws_instance.DB2WASNode01.private_ip : aws_instance.DB2WASNode01.public_ip}",
   "node_name": "${var.DB2WASNode01-name}",
   "runlist": "role[db2_create_db]",
   "node_attributes": {
@@ -793,24 +809,24 @@ resource "camc_softwaredeploy" "DB2WASNode01_db2_create_db" {
 EOT
 }
 
-
 #########################################################
 ##### Resource : DB2WASNode01_db2_v111_install
 #########################################################
 
 resource "camc_softwaredeploy" "DB2WASNode01_db2_v111_install" {
-  depends_on = ["camc_bootstrap.DB2WASNode01_chef_bootstrap_comp"]
-  name = "DB2WASNode01_db2_v111_install"
-  camc_endpoint = "${var.ibm_pm_service}/v1/software_deployment/chef"
-  access_token = "${var.ibm_pm_access_token}"
+  depends_on      = ["camc_bootstrap.DB2WASNode01_chef_bootstrap_comp"]
+  name            = "DB2WASNode01_db2_v111_install"
+  camc_endpoint   = "${var.ibm_pm_service}/v1/software_deployment/chef"
+  access_token    = "${var.ibm_pm_access_token}"
   skip_ssl_verify = true
-  trace = true
+  trace           = true
+
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, format("%s_%s", replace(var.DB2WASNode01-image, "/", "_"), var.aws_ami_owner_id)) : var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
-  "host_ip": "${vsphere_virtual_machine.DB2WASNode01.network_interface.0.ipv4_address}",
+  "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? aws_instance.DB2WASNode01.private_ip : aws_instance.DB2WASNode01.public_ip}",
   "node_name": "${var.DB2WASNode01-name}",
   "runlist": "role[db2_v111_install]",
   "node_attributes": {
@@ -846,24 +862,24 @@ resource "camc_softwaredeploy" "DB2WASNode01_db2_v111_install" {
 EOT
 }
 
-
 #########################################################
 ##### Resource : DB2WASNode01_was_create_standalone
 #########################################################
 
 resource "camc_softwaredeploy" "DB2WASNode01_was_create_standalone" {
-  depends_on = ["camc_softwaredeploy.DB2WASNode01_was_v9_install"]
-  name = "DB2WASNode01_was_create_standalone"
-  camc_endpoint = "${var.ibm_pm_service}/v1/software_deployment/chef"
-  access_token = "${var.ibm_pm_access_token}"
+  depends_on      = ["camc_softwaredeploy.DB2WASNode01_was_v9_install"]
+  name            = "DB2WASNode01_was_create_standalone"
+  camc_endpoint   = "${var.ibm_pm_service}/v1/software_deployment/chef"
+  access_token    = "${var.ibm_pm_access_token}"
   skip_ssl_verify = true
-  trace = true
+  trace           = true
+
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, format("%s_%s", replace(var.DB2WASNode01-image, "/", "_"), var.aws_ami_owner_id)) : var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
-  "host_ip": "${vsphere_virtual_machine.DB2WASNode01.network_interface.0.ipv4_address}",
+  "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? aws_instance.DB2WASNode01.private_ip : aws_instance.DB2WASNode01.public_ip}",
   "node_name": "${var.DB2WASNode01-name}",
   "runlist": "role[was_create_standalone]",
   "node_attributes": {
@@ -909,24 +925,24 @@ resource "camc_softwaredeploy" "DB2WASNode01_was_create_standalone" {
 EOT
 }
 
-
 #########################################################
 ##### Resource : DB2WASNode01_was_v9_install
 #########################################################
 
 resource "camc_softwaredeploy" "DB2WASNode01_was_v9_install" {
-  depends_on = ["camc_softwaredeploy.DB2WASNode01_db2_create_db"]
-  name = "DB2WASNode01_was_v9_install"
-  camc_endpoint = "${var.ibm_pm_service}/v1/software_deployment/chef"
-  access_token = "${var.ibm_pm_access_token}"
+  depends_on      = ["camc_softwaredeploy.DB2WASNode01_db2_create_db"]
+  name            = "DB2WASNode01_was_v9_install"
+  camc_endpoint   = "${var.ibm_pm_service}/v1/software_deployment/chef"
+  access_token    = "${var.ibm_pm_access_token}"
   skip_ssl_verify = true
-  trace = true
+  trace           = true
+
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, format("%s_%s", replace(var.DB2WASNode01-image, "/", "_"), var.aws_ami_owner_id)) : var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
-  "host_ip": "${vsphere_virtual_machine.DB2WASNode01.network_interface.0.ipv4_address}",
+  "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? aws_instance.DB2WASNode01.private_ip : aws_instance.DB2WASNode01.public_ip}",
   "node_name": "${var.DB2WASNode01-name}",
   "runlist": "role[was_v9_install]",
   "node_attributes": {
@@ -976,16 +992,16 @@ resource "camc_softwaredeploy" "DB2WASNode01_was_v9_install" {
 EOT
 }
 
-
 #########################################################
 ##### Resource : VaultItem
 #########################################################
 
 resource "camc_vaultitem" "VaultItem" {
-  camc_endpoint = "${var.ibm_pm_service}/v1/vault_item/chef"
-  access_token = "${var.ibm_pm_access_token}"
+  camc_endpoint   = "${var.ibm_pm_service}/v1/vault_item/chef"
+  access_token    = "${var.ibm_pm_access_token}"
   skip_ssl_verify = true
-  trace = true
+  trace           = true
+
   data = <<EOT
 {
   "vault_content": {
@@ -998,7 +1014,7 @@ EOT
 }
 
 output "DB2WASNode01_ip" {
-  value = "VM IP Address : ${vsphere_virtual_machine.DB2WASNode01.network_interface.0.ipv4_address}"
+  value = "Private : ${aws_instance.DB2WASNode01.private_ip} & Public : ${aws_instance.DB2WASNode01.public_ip}"
 }
 
 output "DB2WASNode01_name" {
@@ -1012,4 +1028,3 @@ output "DB2WASNode01_roles" {
 output "stack_id" {
   value = "${random_id.stack_id.hex}"
 }
-
