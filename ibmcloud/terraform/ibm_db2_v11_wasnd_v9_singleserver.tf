@@ -61,15 +61,6 @@ variable "ibm_stack_name" {
   description = "A unique stack name."
 }
 
-#### Default OS Admin User Map ####
-variable "default_os_admin_user" {
-  type        = "map"
-  description = "look up os_admin_user using resource image"
-  default = {
-    UBUNTU_16_64 = "root"
-    REDHAT_7_64 = "root"
-  }
-}
 
 ##### DB2WASNode01 variables #####
 #Variable : DB2WASNode01-image
@@ -77,13 +68,6 @@ variable "DB2WASNode01-image" {
   type = "string"
   description = "Operating system image id / template that should be used when creating the virtual image"
   default = "REDHAT_7_64"
-}
-
-#Variable : DB2WASNode01-mgmt-network-public
-variable "DB2WASNode01-mgmt-network-public" {
-  type = "string"
-  description = "Expose and use public IP of virtual machine for internal communication"
-  default = "true"
 }
 
 #Variable : DB2WASNode01-name
@@ -405,7 +389,7 @@ variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_profile" {
 variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_server" {
   type = "string"
   description = "Name of the application server"
-  default = "standalone01"
+  default = "server1"
 }
 
 #Variable : DB2WASNode01_was_security_admin_user
@@ -495,6 +479,15 @@ variable "ibm_sw_repo_user" {
 }
 
 
+##### virtualmachine variables #####
+#Variable : DB2WASNode01-mgmt-network-public
+variable "DB2WASNode01-mgmt-network-public" {
+  type = "string"
+  description = "Expose and use public IP of virtual machine for internal communication"
+  default = "true"
+}
+
+
 ##### ungrouped variables #####
 ##### domain name #####
 variable "runtime_domain" {
@@ -528,7 +521,7 @@ variable "DB2WASNode01_private_network_only" {
 variable "DB2WASNode01_number_of_cores" {
   type = "string"
   description = "Number of CPU cores, which is required to be a positive Integer"
-  default = "2"
+  default = "4"
 }
 
 
@@ -536,7 +529,7 @@ variable "DB2WASNode01_number_of_cores" {
 variable "DB2WASNode01_memory" {
   type = "string"
   description = "Amount of Memory (MBs), which is required to be one or more times of 1024"
-  default = "2048"
+  default = "8192"
 }
 
 
@@ -593,7 +586,7 @@ resource "ibm_compute_vm_instance" "DB2WASNode01" {
   ssh_key_ids = ["${data.ibm_compute_ssh_key.ibm_pm_public_key.id}"]
   # Specify the ssh connection
   connection {
-    user = "${var.DB2WASNode01-os_admin_user == "" ? lookup(var.default_os_admin_user, var.DB2WASNode01-image) : var.DB2WASNode01-os_admin_user}"
+    user = "${var.DB2WASNode01-os_admin_user}"
     private_key = "${base64decode(var.ibm_pm_private_ssh_key)}"
   }
 
@@ -665,7 +658,7 @@ resource "camc_bootstrap" "DB2WASNode01_chef_bootstrap_comp" {
   trace = true
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, var.DB2WASNode01-image) : var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
   "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? ibm_compute_vm_instance.DB2WASNode01.ipv4_address_private : ibm_compute_vm_instance.DB2WASNode01.ipv4_address}",
@@ -698,7 +691,7 @@ resource "camc_softwaredeploy" "DB2WASNode01_db2_create_db" {
   trace = true
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, var.DB2WASNode01-image) : var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
   "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? ibm_compute_vm_instance.DB2WASNode01.ipv4_address_private : ibm_compute_vm_instance.DB2WASNode01.ipv4_address}",
@@ -792,7 +785,7 @@ resource "camc_softwaredeploy" "DB2WASNode01_db2_v111_install" {
   trace = true
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, var.DB2WASNode01-image) : var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
   "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? ibm_compute_vm_instance.DB2WASNode01.ipv4_address_private : ibm_compute_vm_instance.DB2WASNode01.ipv4_address}",
@@ -845,7 +838,7 @@ resource "camc_softwaredeploy" "DB2WASNode01_was_create_standalone" {
   trace = true
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, var.DB2WASNode01-image) : var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
   "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? ibm_compute_vm_instance.DB2WASNode01.ipv4_address_private : ibm_compute_vm_instance.DB2WASNode01.ipv4_address}",
@@ -908,7 +901,7 @@ resource "camc_softwaredeploy" "DB2WASNode01_was_v9_install" {
   trace = true
   data = <<EOT
 {
-  "os_admin_user": "${var.DB2WASNode01-os_admin_user == "default"? lookup(var.default_os_admin_user, var.DB2WASNode01-image) : var.DB2WASNode01-os_admin_user}",
+  "os_admin_user": "${var.DB2WASNode01-os_admin_user}",
   "stack_id": "${random_id.stack_id.hex}",
   "environment_name": "_default",
   "host_ip": "${var.DB2WASNode01-mgmt-network-public == "false" ? ibm_compute_vm_instance.DB2WASNode01.ipv4_address_private : ibm_compute_vm_instance.DB2WASNode01.ipv4_address}",

@@ -12,10 +12,6 @@
       "label": "Cloud Input Variables"
     },
     {
-      "name": "virtualmachine",
-      "label": "Virtual Machine Input Variables"
-    },
-    {
       "name": "ssh_keys",
       "label": "SSH Keys"
     },
@@ -26,6 +22,10 @@
     {
       "name": "environment",
       "label": "Environment"
+    },
+    {
+      "name": "virtualmachine",
+      "label": "Virtual Machine Input Variables"
     }
   ],
   "output_groups": [
@@ -603,7 +603,7 @@
       "name": "DB2WASNode01_db2_instances_instance1_databases_database1_pagesize",
       "type": "string",
       "description": "Specifies the page size in bytes.",
-      "default": "8192",
+      "default": "4096",
       "hidden": false,
       "label": "DB2 page size - DB2WASNode01",
       "secured": false,
@@ -628,7 +628,6 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
       "group_name": "db2wasnode01"
     },
     {
@@ -1052,7 +1051,7 @@
       "name": "DB2WASNode01_number_of_vcpu",
       "type": "string",
       "description": "Number of virtual CPU for the virtual machine, which is required to be a positive Integer",
-      "default": 2,
+      "default": 4,
       "hidden": false,
       "label": "Virtual Machine vCPUs - DB2WASNode01",
       "secured": false,
@@ -1127,7 +1126,7 @@
       "name": "DB2WASNode01_was_profiles_standalone_profiles_standalone1_server",
       "type": "string",
       "description": "Name of the application server",
-      "default": "standalone01",
+      "default": "server1",
       "hidden": true,
       "label": "WebSphere Application Server name - DB2WASNode01",
       "secured": false,
@@ -1354,6 +1353,7 @@
       "secured": false,
       "required": true,
       "immutable": false,
+      "immutable_after_create": true,
       "group_name": "ssh_keys"
     }
   ],

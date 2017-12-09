@@ -58,7 +58,6 @@ variable "ibm_stack_name" {
   description = "A unique stack name."
 }
 
-#### Default OS Admin User Map ####
 
 ##### DB2WASNode01 variables #####
 #Variable : DB2WASNode01-image
@@ -386,7 +385,7 @@ variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_profile" {
 variable "DB2WASNode01_was_profiles_standalone_profiles_standalone1_server" {
   type = "string"
   description = "Name of the application server"
-  default = "standalone01"
+  default = "server1"
 }
 
 #Variable : DB2WASNode01_was_security_admin_user
@@ -476,6 +475,8 @@ variable "ibm_sw_repo_user" {
 }
 
 
+##### virtualmachine variables #####
+
 #########################################################
 ##### Resource : DB2WASNode01
 #########################################################
@@ -499,12 +500,12 @@ variable "DB2WASNode01_domain" {
 
 variable "DB2WASNode01_number_of_vcpu" {
   description = "Number of virtual CPU for the virtual machine, which is required to be a positive Integer"
-  default = "2"
+  default = "4"
 }
 
 variable "DB2WASNode01_memory" {
   description = "Memory assigned to the virtual machine in megabytes. This value is required to be an increment of 1024"
-  default = "2048"
+  default = "8192"
 }
 
 variable "DB2WASNode01_cluster" {

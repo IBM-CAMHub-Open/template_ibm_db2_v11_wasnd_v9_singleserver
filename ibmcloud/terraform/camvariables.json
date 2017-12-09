@@ -12,10 +12,6 @@
       "label": "Cloud Input Variables"
     },
     {
-      "name": "virtualmachine",
-      "label": "Virtual Machine Input Variables"
-    },
-    {
       "name": "ssh_keys",
       "label": "SSH Keys"
     },
@@ -26,6 +22,10 @@
     {
       "name": "environment",
       "label": "Environment"
+    },
+    {
+      "name": "virtualmachine",
+      "label": "Virtual Machine Input Variables"
     },
     {
       "name": "ungrouped",
@@ -595,7 +595,7 @@
       "name": "DB2WASNode01_db2_instances_instance1_databases_database1_pagesize",
       "type": "string",
       "description": "Specifies the page size in bytes.",
-      "default": "8192",
+      "default": "4096",
       "hidden": false,
       "label": "DB2 page size - DB2WASNode01",
       "secured": false,
@@ -794,30 +794,6 @@
       "group_name": "environment"
     },
     {
-      "name": "DB2WASNode01_local_disk",
-      "type": "string",
-      "description": "User local disk or SAN disk",
-      "default": "false",
-      "hidden": false,
-      "label": "IBMCloud - Local / SAN Disk - DB2WASNode01",
-      "secured": false,
-      "options": [
-        {
-          "value": "true",
-          "label": "True"
-        },
-        {
-          "value": "false",
-          "label": "False",
-          "default": "true"
-        }
-      ],
-      "required": true,
-      "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
-    },
-    {
       "name": "DB2WASNode01_datacenter",
       "type": "string",
       "description": "IBMCloud datacenter where infrastructure resources will be deployed",
@@ -954,8 +930,7 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01_dedicated_acct_host_only",
@@ -978,8 +953,7 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01_hourly_billing",
@@ -1002,8 +976,7 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01_network_speed",
@@ -1026,8 +999,7 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01_private_network_only",
@@ -1050,14 +1022,13 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01_memory",
       "type": "string",
       "description": "Amount of Memory (MBs), which is required to be one or more times of 1024",
-      "default": 8192,
+      "default": 4096,
       "hidden": false,
       "label": "IBMCloud VSI Memory - DB2WASNode01",
       "secured": false,
@@ -1094,8 +1065,7 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01_number_of_cores",
@@ -1138,8 +1108,7 @@
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01-image",
@@ -1175,18 +1144,17 @@
       "options": [
         {
           "value": "25",
-          "label": "25 GB",
-          "default": true
+          "label": "25 GB"
         },
         {
           "value": "100",
-          "label": "100 GB"
+          "label": "100 GB",
+          "default": true
         }
       ],
       "required": true,
       "immutable": false,
-      "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "cloud"
     },
     {
       "name": "DB2WASNode01-name",
@@ -1205,7 +1173,7 @@
       "description": "Expose and use public IP of virtual machine for internal communication",
       "default": "true",
       "hidden": false,
-      "label": "Use Public Management Network - DB2WASNode01",
+      "label": "Use Public Management Network",
       "secured": false,
       "options": [
         {
@@ -1220,7 +1188,7 @@
       "required": true,
       "immutable": false,
       "immutable_after_create": true,
-      "group_name": "db2wasnode01"
+      "group_name": "virtualmachine"
     },
     {
       "name": "DB2WASNode01_was_version",
@@ -1278,7 +1246,7 @@
       "name": "DB2WASNode01_was_profiles_standalone_profiles_standalone1_server",
       "type": "string",
       "description": "Name of the application server",
-      "default": "standalone01",
+      "default": "server1",
       "hidden": true,
       "label": "WebSphere Application Server name - DB2WASNode01",
       "secured": false,
@@ -1440,6 +1408,29 @@
       "group_name": "db2wasnode01"
     },
     {
+      "name": "DB2WASNode01_local_disk",
+      "type": "string",
+      "description": "User local disk or SAN disk",
+      "default": "false",
+      "hidden": false,
+      "label": "IBMCloud - Local / SAN Disk - DB2WASNode01",
+      "secured": false,
+      "options": [
+        {
+          "value": "true",
+          "label": "True"
+        },
+        {
+          "value": "false",
+          "label": "False",
+          "default": "true"
+        }
+      ],
+      "required": true,
+      "immutable": false,
+      "group_name": "cloud"
+    },
+    {
       "name": "ibm_pm_private_ssh_key",
       "type": "string",
       "description": "Private CAMC SSH key (base64 encoded) used to connect to the virtual guest.",
@@ -1473,6 +1464,7 @@
       "secured": false,
       "required": true,
       "immutable": false,
+      "immutable_after_create": true,
       "group_name": "ssh_keys"
     },
     {
