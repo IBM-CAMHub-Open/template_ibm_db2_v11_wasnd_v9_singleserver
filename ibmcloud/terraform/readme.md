@@ -1,5 +1,5 @@
 # Template - IBM DB2 Enterprise Server Edition V11.1 and WebSphere Application Server Network Deployment V9 on a single virtual machine
-Template Version - 1.0
+Template Version - 2.0
 
 ## Description
 
@@ -10,10 +10,6 @@ This template deploys IBM DB2 Enterprise Server Edition V11.1 and WebSphere Appl
 ### Clouds
 
  IBM<br>
-<br>
-### Template Version
-
-1.0<br>
 <br>
 ### Operating Systems Supported
 
@@ -35,7 +31,7 @@ IBM WebSphere Application Server Network Deployment V9<br>
 <br>
 ### Default Virtual Machine Settings
 
- Cores 2, RAM (GB) 8, SAN (GB) 25<br>
+ Cores 2, RAM (GB) 8, SAN (GB) 100<br>
 <br>
 ### Usage and Special Notes
 
@@ -51,7 +47,7 @@ IBM WebSphere Application Server Network Deployment V9<br>
 
 ### License and Maintainer
 
-Copyright IBM Corp. 2016, 2017 
+Copyright IBM Corp. 2017, 2018 
 
 ### Target Cloud Type
 
@@ -73,10 +69,11 @@ IBM
 ### Minor Versions
 
 - IBM DB2 Enterprise Server 10.5.0.3
-- IBM DB2 Enterprise Server 10.5.0.8
-- IBM DB2 Enterprise Server 11.1.0.0
+- IBM DB2 Enterprise Server 10.5.0.9
+- IBM DB2 Enterprise Server 11.1.2.2
 - IBM WebSphere  8.5.5.12
 - IBM WebSphere  9.0.0.4
+- IBM WebSphere  9.0.0.6
 
 
 *Note, these represent base versions only, explicit fixpacks may also be added.*
@@ -384,7 +381,7 @@ The following files are neccessary on the Software Repository to successfully in
     <td>10</td>
     <td>X86_64</td>
     <td>/db2/v105/base</td>
-    <td><br>DB2_Svr_10.5.0.0_Linux_linuxx64.tar.gz</br></td>
+    <td><br>DB2_Svr_10.5.0.8_Linux_linuxx64.tar.gz</br></td>
   </tr>
 </table>
 
@@ -397,16 +394,16 @@ The following files are neccessary on the Software Repository to successfully in
     <th>File</th>
   </tr>
   <tr>
-    <td>10.5.0.3</td>
+    <td>10.5.0.9</td>
     <td>X86_64</td>
     <td>/db2/v105/maint</td>
-    <td><br>DB2_Svr_10.5.0.3_Linux_linuxx64.tar.gz</br></td>
+    <td><br>DB2_Svr_10.5.0.9_Linux_linuxx64.tar.gz</br></td>
   </tr>
   <tr>
     <td>11.1</td>
     <td>X86_64</td>
     <td>/db2/v111/base</td>
-    <td><br>DB2_Svr_11.1.0.0_Linux_linuxx64.tar.gz</br></td>
+    <td><br>DB2_Svr_11.1.2.2_Linux_linuxx64.tar.gz</br></td>
   </tr>
 </table>
 
