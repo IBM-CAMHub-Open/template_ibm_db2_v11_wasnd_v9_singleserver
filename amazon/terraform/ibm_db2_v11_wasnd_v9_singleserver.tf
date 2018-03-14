@@ -18,7 +18,7 @@
 # This is a terraform generated template generated from ibm_db2_v11_wasnd_v9_singleserver
 
 ##############################################################
-# Keys - CAMC (public/private) & optional User Key (public) 
+# Keys - CAMC (public/private) & optional User Key (public)
 ##############################################################
 variable "ibm_pm_public_ssh_key_name" {
   description = "Public CAMC SSH key name used to connect to the virtual guest."
@@ -49,7 +49,7 @@ variable "aws_region" {
 }
 
 ##############################################################
-# Define the aws provider 
+# Define the aws provider
 ##############################################################
 provider "aws" {
   region = "${var.aws_region}"
@@ -87,7 +87,7 @@ variable "aws_sg_camc_name" {
 }
 
 ##############################################################
-# Define pattern variables 
+# Define pattern variables
 ##############################################################
 ##### unique stack name #####
 variable "ibm_stack_name" {
@@ -877,7 +877,7 @@ EOT
 #########################################################
 
 resource "camc_softwaredeploy" "DB2WASNode01_was_create_standalone" {
-  depends_on = ["camc_softwaredeploy.DB2WASNode01_db2_create_db"]
+  depends_on = ["camc_softwaredeploy.DB2WASNode01_was_v9_install"]
   name = "DB2WASNode01_was_create_standalone"
   camc_endpoint = "${var.ibm_pm_service}/v1/software_deployment/chef"
   access_token = "${var.ibm_pm_access_token}"
@@ -1037,4 +1037,3 @@ output "DB2WASNode01_roles" {
 output "stack_id" {
   value = "${var.ibm_stack_id}"
 }
-

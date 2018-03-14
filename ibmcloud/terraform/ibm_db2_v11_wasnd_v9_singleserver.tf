@@ -844,7 +844,7 @@ EOT
 #########################################################
 
 resource "camc_softwaredeploy" "DB2WASNode01_was_create_standalone" {
-  depends_on = ["camc_softwaredeploy.DB2WASNode01_db2_create_db"]
+  depends_on = ["camc_softwaredeploy.DB2WASNode01_was_v9_install"]
   name = "DB2WASNode01_was_create_standalone"
   camc_endpoint = "${var.ibm_pm_service}/v1/software_deployment/chef"
   access_token = "${var.ibm_pm_access_token}"
