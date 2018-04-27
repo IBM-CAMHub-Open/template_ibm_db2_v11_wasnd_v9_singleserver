@@ -71,7 +71,7 @@
     },
     {
       "name": "DB2WASNode01_db2_das_password",
-      "type": "string",
+      "type": "password",
       "description": "DB2 Administration Server (DAS) password",
       "hidden": false,
       "label": "DB2 DAS user password - DB2WASNode01",
@@ -388,7 +388,7 @@
     },
     {
       "name": "DB2WASNode01_db2_instances_instance1_databases_database1_database_users_db_user1_user_password",
-      "type": "string",
+      "type": "password",
       "description": "The password for the database user name.",
       "hidden": false,
       "label": "DB2 database user password - DB2WASNode01",
@@ -432,7 +432,7 @@
     },
     {
       "name": "DB2WASNode01_db2_instances_instance1_fenced_password",
-      "type": "string",
+      "type": "password",
       "description": "The password for the DB2 fenced username.",
       "hidden": false,
       "label": "DB2 fenced user password - DB2WASNode01",
@@ -568,7 +568,7 @@
     },
     {
       "name": "DB2WASNode01_db2_instances_instance1_instance_password",
-      "type": "string",
+      "type": "password",
       "description": "The password for the DB2 instance username.",
       "hidden": false,
       "label": "DB2 instance user password - DB2WASNode01",
@@ -811,7 +811,7 @@
     },
     {
       "name": "ibm_im_repo_password",
-      "type": "string",
+      "type": "password",
       "description": "IBM Software  Installation Manager Repository Password",
       "hidden": true,
       "label": "IBM Software Installation Manager Repository Password",
@@ -836,7 +836,7 @@
     },
     {
       "name": "ibm_sw_repo_password",
-      "type": "string",
+      "type": "password",
       "description": "IBM Software Repo Password",
       "hidden": true,
       "label": "IBM Software Repo Password",
@@ -897,7 +897,7 @@
     },
     {
       "name": "DB2WASNode01-os_password",
-      "type": "string",
+      "type": "password",
       "description": "Operating System Password for the Operating System User to access virtual machine",
       "hidden": false,
       "label": "Operating system password - DB2WASNode01",
@@ -1138,7 +1138,7 @@
     },
     {
       "name": "DB2WASNode01_was_security_admin_user_pwd",
-      "type": "string",
+      "type": "password",
       "description": "The password for the WebSphere administrative account",
       "hidden": false,
       "label": "WebSphere administrative user password - DB2WASNode01",
@@ -1150,7 +1150,7 @@
     },
     {
       "name": "DB2WASNode01_was_profiles_standalone_profiles_standalone1_keystorepassword",
-      "type": "string",
+      "type": "password",
       "description": "Specifies the password to use on all keystore files created during profile creation",
       "hidden": false,
       "label": "WebSphere default keystore password - DB2WASNode01",
