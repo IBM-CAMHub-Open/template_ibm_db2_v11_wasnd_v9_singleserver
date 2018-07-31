@@ -74,6 +74,7 @@ VMware vSphere
 - IBM WebSphere  8.5.5.12
 - IBM WebSphere  9.0.0.4
 - IBM WebSphere  9.0.0.6
+- IBM WebSphere  9.0.0.8
 
 
 *Note, these represent base versions only, explicit fixpacks may also be added.*
