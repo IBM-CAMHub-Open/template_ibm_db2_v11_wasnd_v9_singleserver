@@ -23,7 +23,6 @@
       }
     },
     "metadata": {
-      "displayName": "IBM DB2 Enterprise Server Edition V11.1 and WebSphere Application Server Network Deployment V9 on a single virtual machine",
       "providerDisplayName": "IBM",
       "longDescription": "This template deploys IBM DB2 Enterprise Server Edition V11.1 and WebSphere Application Server Network Deployment V9 on a Linux virtual machine.",
       "bullets": [{
